@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register App — Alok Auth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle radial glow behind the card */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .container {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 48px 40px 40px;
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Top edge highlight line */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            right: 24px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 32px;
+        }
+
+        .brand-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ededed;
+            letter-spacing: -0.3px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            color: #ededed;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #71717a;
+            text-align: center;
+            margin: -20px 0 32px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #a1a1aa;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #0a0a0a;
+            color: #ededed;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input::placeholder {
+            color: #3f3f46;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ededed;
+            box-shadow: 0 0 0 1px #ededed;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #52525b;
+            margin-top: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 0;
+            background: #ededed;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: background 0.15s ease;
+        }
+
+        button:hover {
+            background: #fff;
+        }
+
+        button:active {
+            background: #d4d4d8;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #1a1a1a;
+        }
+
+        .divider span {
+            font-size: 12px;
+            color: #52525b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .error-msg {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ---- Credentials display ---- */
+        .credentials {
+            display: none;
+            width: 100%;
+        }
+
+        .credentials h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ededed;
+            text-align: center;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .success-badge {
+            text-align: center;
+            font-size: 14px;
+            color: #22c55e;
+            margin-bottom: 28px;
+        }
+
+        .cred-field {
+            margin-bottom: 20px;
+        }
+
+        .cred-field label {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cred-value-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cred-value {
+            flex: 1;
+            padding: 10px 12px;
+            background: #111;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #ededed;
+            line-height: 1.5;
+        }
+
+        .copy-btn {
+            width: auto;
+            padding: 10px 16px;
+            margin-top: 0;
+            font-size: 13px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .cred-value code,
+        .hint code {
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 12px;
+            color: #d4d4d8;
+        }
+
+        .warning-box {
+            margin-top: 24px;
+            padding: 12px 14px;
+            background: rgba(234, 179, 8, 0.06);
+            border: 1px solid rgba(234, 179, 8, 0.15);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #eab308;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #71717a;
+        }
+
+        .back-link a {
+            color: #ededed;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        .back-link a:hover {
+            color: #fff;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        @media (max-width: 440px) {
+            .container {
+                margin: 16px;
+                padding: 36px 24px 32px;
+            }
+
+            .cred-value-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="form-section" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+            <div class="brand">
+                <div class="brand-logo">A</div>
+                <span class="brand-name">Alok Auth</span>
+            </div>
+            <h1>Register your app</h1>
+            <p class="subtitle">Get a Client ID and Secret to integrate OAuth</p>
+
+            <div class="error-msg" id="error-msg"></div>
+
+            <form id="client-form">
+                <div class="form-group">
+                    <label for="app_name">Application name</label>
+                    <input type="text" name="app_name" id="app_name" placeholder="My Awesome App" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="website_url">Website URL</label>
+                    <input type="url" name="website_url" id="website_url" placeholder="https://myapp.com" required>
+                    <p class="hint">The homepage of your application</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="redirect_uri">Redirect URI</label>
+                    <input type="url" name="redirect_uri" id="redirect_uri"
+                        placeholder="https://myapp.com/auth/callback" required>
+                    <p class="hint">Where users are sent after authorization</p>
+                </div>
+
+                <button id="submit-btn" type="submit">Register application</button>
+            </form>
+
+            <div class="divider"><span>or</span></div>
+
+            <div class="back-link">
+                Need to test the user flow? <a href="/auth/login">Open sign in</a>
+            </div>
+        </div>
+
+        <div id="credentials-section" class="credentials">
+            <div class="brand">
+                <div class="brand-logo">A</div>
+                <span class="brand-name">Alok Auth</span>
+            </div>
+            <h2>App registered</h2>
+            <p class="success-badge">✓ Your application has been registered</p>
+
+            <div class="cred-field">
+                <label>Application name</label>
+                <div class="cred-value" id="display-app-name"></div>
+            </div>
+
+            <div class="cred-field">
+                <label>Client ID</label>
+                <div class="cred-value-wrapper">
+                    <div class="cred-value" id="display-client-id"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('display-client-id', this)">Copy</button>
+                </div>
+            </div>
+
+            <div class="cred-field">
+                <label>Client Secret</label>
+                <div class="cred-value-wrapper">
+                    <div class="cred-value" id="display-client-secret"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('display-client-secret', this)">Copy</button>
+                </div>
+            </div>
+
+            <div class="cred-field">
+                <label>Login redirect URL</label>
+                <div class="cred-value-wrapper">
+                    <div class="cred-value" id="display-authorization-url"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('display-authorization-url', this)">Copy</button>
+                </div>
+                <p class="hint">Send users here when they click your login button. Replace the placeholder values for <code>state</code> and <code>nonce</code>.</p>
+            </div>
+
+            <div class="warning-box">
+                ⚠ Save your Client Secret now — you won't be able to see it again.
+            </div>
+
+            <div class="divider"><span>next</span></div>
+
+            <div class="back-link">
+                <a href="/client/register">Register another app</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('client-form');
+        const errorMsg = document.getElementById('error-msg');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering…';
+
+            const formData = new URLSearchParams(new FormData(form));
+
+            try {
+                const res = await fetch('/client/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData,
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+
+                document.getElementById('display-app-name').textContent = data.app_name;
+                document.getElementById('display-client-id').textContent = data.client_id;
+                document.getElementById('display-client-secret').textContent = data.client_secret;
+                document.getElementById('display-authorization-url').textContent = data.authorization_url;
+
+                document.getElementById('form-section').style.display = 'none';
+                document.getElementById('credentials-section').style.display = 'block';
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register application';
+            }
+        });
+
+        function copyToClipboard(elementId, btn) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
