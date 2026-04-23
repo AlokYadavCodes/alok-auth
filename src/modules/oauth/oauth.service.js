@@ -86,6 +86,13 @@ async function startAuthorization(req) {
         created_at: Date.now(),
     };
 
+    if (req.session.userId) {
+        return handleAuthenticatedLogin(req, {
+            flowId,
+            userId: req.session.userId,
+        });
+    }
+
     return `/auth/login?flow=${flowId}`;
 }
 

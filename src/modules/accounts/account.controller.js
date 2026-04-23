@@ -19,6 +19,7 @@ async function register(req, res) {
 async function login(req, res) {
     const { flow: flowId } = req.body;
     const user = await authenticateUser(req.body);
+    req.session.userId = user.id;
 
     if (flowId) {
         const redirectUrl = await handleAuthenticatedLogin(req, {

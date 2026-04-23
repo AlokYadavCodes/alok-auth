@@ -1,5 +1,7 @@
 import express from "express";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db/pool.js";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import errorHandler from "./middleware/error-handler.js";
@@ -8,20 +10,27 @@ import clientAppRoutes from "./modules/client-apps/client-app.routes.js";
 import oauthRoutes from "./modules/oauth/oauth.routes.js";
 
 const app = express();
+const PgSessionStore = connectPgSimple(session);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
-    name: "oauth_sid",
+    name: "auth_sid",
     secret: env.sessionSecret,
+    store: new PgSessionStore({
+        pool,
+        tableName: "auth_sessions",
+        createTableIfMissing: true,
+    }),
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
-        maxAge: 10 * 60 * 1000,
+        maxAge: env.sessionMaxAgeMs,
         httpOnly: true,
-        sameSite: true,
+        sameSite: "lax",
+        secure: env.nodeEnv === "production",
     },
 }));
 
