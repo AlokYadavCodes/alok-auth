@@ -174,15 +174,20 @@
             background: #fff;
         }
 
-        button:active {
-            background: #d4d4d8;
-        }
+	        button:active {
+	            background: #d4d4d8;
+	        }
 
-        .divider {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+	        button:disabled {
+	            opacity: 0.72;
+	            cursor: not-allowed;
+	        }
+
+	        .divider {
+	            width: 100%;
+	            display: flex;
+	            align-items: center;
+	            gap: 12px;
             margin: 24px 0;
         }
 
@@ -240,6 +245,8 @@
         <p class="subtitle">Sign up to continue with Alok Auth</p>
 
         <form method="post" action="/auth/register">
+            <input type="hidden" name="flow" id="flow">
+            <input type="hidden" name="returnTo" id="return-to">
             <div class="form-group">
                 <label for="name">Full name</label>
                 <input type="text" name="name" id="name" placeholder="Jane Doe" autocomplete="name" required>
@@ -268,22 +275,59 @@
         <div class="divider"><span>or</span></div>
 
         <div class="login-link">
-            Already have an account? <a href="/auth/login">Sign in</a>
+            Already have an account? <a id="login-link" href="/auth/login">Sign in</a>
         </div>
     </div>
 
     <script>
-        document.querySelector('form').addEventListener('submit', function (e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+        const flowInput = document.getElementById('flow');
+        const returnToInput = document.getElementById('return-to');
+        const loginLink = document.getElementById('login-link');
+        const params = new URLSearchParams(window.location.search);
 
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match!');
-                document.getElementById('confirmPassword').focus();
-            }
-        });
-    </script>
-</body>
+        flowInput.value = params.get('flow') || '';
+        returnToInput.value = params.get('returnTo') || '';
+
+        const loginParams = new URLSearchParams();
+        if (flowInput.value) {
+            loginParams.set('flow', flowInput.value);
+        }
+        if (returnToInput.value) {
+            loginParams.set('returnTo', returnToInput.value);
+        }
+
+	        loginLink.href = loginParams.toString()
+	            ? `/auth/login?${loginParams.toString()}`
+	            : '/auth/login';
+
+	        const form = document.querySelector('form');
+	        const submitBtn = document.getElementById('submit-btn');
+
+	        form.addEventListener('submit', function (e) {
+	            if (submitBtn.disabled) {
+	                e.preventDefault();
+	                return;
+	            }
+
+	            const password = document.getElementById('password').value;
+	            const confirmPassword = document.getElementById('confirmPassword').value;
+
+	            if (password !== confirmPassword) {
+	                e.preventDefault();
+	                alert('Passwords do not match!');
+	                document.getElementById('confirmPassword').focus();
+	                return;
+	            }
+
+	            if (!form.checkValidity()) {
+	                return;
+	            }
+
+	            submitBtn.disabled = true;
+	            submitBtn.setAttribute('aria-busy', 'true');
+	            submitBtn.textContent = 'Creating account...';
+	        });
+	    </script>
+	</body>
 
 </html>

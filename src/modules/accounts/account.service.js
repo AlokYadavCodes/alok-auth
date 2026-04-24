@@ -1,37 +1,46 @@
-import bcrypt from "bcrypt";
-import { createUser, findUserByEmail } from "./account.repository.js";
+import {
+    findAuthorizedAppCountByUserId,
+    findAuthorizedAppsByUserId,
+    revokeClientAccess,
+} from "./account.repository.js";
 import ApiError from "../../utils/ApiError.js";
+import { findUserProfileById } from "../oauth/oauth.repository.js";
 
-async function registerUser({ name, email, password }) {
-    if (!name || !email || !password) {
-        throw ApiError.badRequest("All fields are required: name, email, password");
-    }
-
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-        throw ApiError.conflict("Email already in use");
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    await createUser({ name, email, passwordHash });
-}
-
-async function authenticateUser({ email, password }) {
-    if (!email || !password) {
-        throw ApiError.badRequest("Email and password are required");
-    }
-
-    const user = await findUserByEmail(email);
+async function getAccountOverview(userId) {
+    const user = await findUserProfileById(userId);
     if (!user) {
-        throw ApiError.unauthorized("Invalid Credentials");
+        throw ApiError.notFound("User not found");
     }
+    const authorizedAppCount = await findAuthorizedAppCountByUserId(userId);
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-        throw ApiError.unauthorized("Invalid Credentials");
-    }
-
-    return user;
+    return {
+        user,
+        authorizedAppCount,
+    };
 }
 
-export { authenticateUser, registerUser };
+async function getAuthorizedApps(userId) {
+    const user = await findUserProfileById(userId);
+    const apps = await findAuthorizedAppsByUserId(userId);
+
+    return {
+        user,
+        apps: apps.map((app) => ({
+            clientId: app.client_id,
+            appName: app.app_name,
+            websiteUrl: app.website_url,
+            grantedScopes: app.scope.split(" "),
+            lastUpdated: app.updated_at,
+        })),
+    };
+}
+
+async function revokeAuthorizedAppAccess(userId, clientId) {
+    await revokeClientAccess({ userId, clientId });
+}
+
+export {
+    getAccountOverview,
+    getAuthorizedApps,
+    revokeAuthorizedAppAccess,
+};

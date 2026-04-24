@@ -167,15 +167,20 @@
             background: #fff;
         }
 
-        button:active {
-            background: #d4d4d8;
-        }
+	        button:active {
+	            background: #d4d4d8;
+	        }
 
-        .divider {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+	        button:disabled {
+	            opacity: 0.72;
+	            cursor: not-allowed;
+	        }
+
+	        .divider {
+	            width: 100%;
+	            display: flex;
+	            align-items: center;
+	            gap: 12px;
             margin: 24px 0;
         }
 
@@ -248,6 +253,7 @@
 
         <form method="post" action="/auth/login">
             <input type="hidden" name="flow" id="flow">
+            <input type="hidden" name="returnTo" id="return-to">
             <div class="form-group">
                 <label for="email">Email address</label>
                 <input type="text" name="email" id="email" placeholder="you@example.com" autocomplete="email" required>
@@ -263,15 +269,45 @@
         <div class="divider"><span>or</span></div>
 
         <div class="register-link">
-            Don't have an account? <a href="/auth/register">Sign up</a>
+            Don't have an account? <a id="register-link" href="/auth/register">Sign up</a>
         </div>
     </div>
 
     <script>
         const flowInput = document.getElementById('flow');
+        const returnToInput = document.getElementById('return-to');
+        const registerLink = document.getElementById('register-link');
         const params = new URLSearchParams(window.location.search);
         flowInput.value = params.get('flow') || '';
-    </script>
-</body>
+        returnToInput.value = params.get('returnTo') || '';
+
+        const registerParams = new URLSearchParams();
+        if (flowInput.value) {
+            registerParams.set('flow', flowInput.value);
+        }
+        if (returnToInput.value) {
+            registerParams.set('returnTo', returnToInput.value);
+        }
+
+	        registerLink.href = registerParams.toString()
+	            ? `/auth/register?${registerParams.toString()}`
+	            : '/auth/register';
+
+	        const form = document.querySelector('form');
+	        const submitBtn = document.getElementById('submit-btn');
+
+	        form.addEventListener('submit', () => {
+	            if (submitBtn.disabled) {
+	                return;
+	            }
+	            if (!form.checkValidity()) {
+	                return;
+	            }
+	            submitBtn.disabled = true;
+	            submitBtn.setAttribute('aria-busy', 'true');
+	            submitBtn.textContent = 'Signing in...';
+	        });
+	    </script>
+	</body>
 
 </html>

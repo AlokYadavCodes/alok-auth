@@ -1,35 +1,30 @@
-import path from "path";
-import { authenticateUser, registerUser } from "./account.service.js";
-import { viewsPath } from "../../utils/paths.js";
-import { handleAuthenticatedLogin } from "../oauth/oauth.service.js";
+import {
+    getAccountOverview,
+    getAuthorizedApps,
+    revokeAuthorizedAppAccess,
+} from "./account.service.js";
+import { renderAccountPage, renderAuthorizedAppsPage } from "./account.page.js";
 
-function showLoginPage(req, res) {
-    res.sendFile(path.join(viewsPath, "login.html"));
+async function showAccountPage(req, res) {
+    const pageData = await getAccountOverview(req.session.userId);
+    res.send(renderAccountPage(pageData));
 }
 
-function showRegisterPage(req, res) {
-    res.sendFile(path.join(viewsPath, "register.html"));
+async function showAuthorizedAppsPage(req, res) {
+    const pageData = await getAuthorizedApps(req.session.userId);
+    res.send(renderAuthorizedAppsPage({
+        ...pageData,
+        revoked: req.query.revoked === "1",
+    }));
 }
 
-async function register(req, res) {
-    await registerUser(req.body);
-    res.status(201).send("User registered successfully");
+async function revokeAuthorizedApp(req, res) {
+    await revokeAuthorizedAppAccess(req.session.userId, req.params.clientId);
+    res.redirect(303, "/account/apps?revoked=1");
 }
 
-async function login(req, res) {
-    const { flow: flowId } = req.body;
-    const user = await authenticateUser(req.body);
-    req.session.userId = user.id;
-
-    if (flowId) {
-        const redirectUrl = await handleAuthenticatedLogin(req, {
-            flowId,
-            userId: user.id,
-        });
-        return res.redirect(redirectUrl);
-    }
-
-    res.status(200).send("user logged in successfully");
-}
-
-export { login, register, showLoginPage, showRegisterPage };
+export {
+    revokeAuthorizedApp,
+    showAccountPage,
+    showAuthorizedAppsPage,
+};

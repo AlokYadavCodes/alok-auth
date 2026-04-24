@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { login, register, showLoginPage, showRegisterPage } from "./account.controller.js";
+import requireAuthenticatedUser from "../../middleware/require-authenticated-user.js";
+import { revokeAuthorizedApp, showAccountPage, showAuthorizedAppsPage } from "./account.controller.js";
 
 const router = Router();
 
-router.get("/login", showLoginPage);
-router.get("/register", showRegisterPage);
-router.post("/login", login);
-router.post("/register", register);
+router.use(requireAuthenticatedUser);
+router.get("/", showAccountPage);
+router.get("/apps", showAuthorizedAppsPage);
+router.post("/apps/:clientId/revoke", revokeAuthorizedApp);
 
 export default router;

@@ -5,8 +5,10 @@ import { pool } from "./db/pool.js";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import errorHandler from "./middleware/error-handler.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 import accountRoutes from "./modules/accounts/account.routes.js";
 import clientAppRoutes from "./modules/client-apps/client-app.routes.js";
+import homeRoutes from "./modules/home/home.routes.js";
 import oauthRoutes from "./modules/oauth/oauth.routes.js";
 
 const app = express();
@@ -34,8 +36,10 @@ app.use(session({
     },
 }));
 
+app.use("/", homeRoutes);
 app.use("/", oauthRoutes);
-app.use("/auth", accountRoutes);
+app.use("/auth", authRoutes);
+app.use("/account", accountRoutes);
 app.use("/client", clientAppRoutes);
 app.use(errorHandler);
 

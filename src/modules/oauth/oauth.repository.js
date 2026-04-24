@@ -105,7 +105,7 @@ async function deleteRefreshToken(token) {
 }
 
 async function findUserProfileById(userId) {
-    const result = await pool.query("SELECT email, name FROM users WHERE id = $1", [userId]);
+    const result = await pool.query("SELECT id, email, name FROM users WHERE id = $1", [userId]);
     return result.rows[0] || null;
 }
 

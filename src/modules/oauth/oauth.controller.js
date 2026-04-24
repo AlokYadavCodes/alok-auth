@@ -1,4 +1,4 @@
-import { renderConsentPage } from "./consent-page.js";
+import { renderConsentPage } from "./consent.page.js";
 import {
     exchangeToken,
     getCerts,

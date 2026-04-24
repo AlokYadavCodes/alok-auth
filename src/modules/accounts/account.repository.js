@@ -10,6 +10,31 @@ async function findUserById(userId) {
     return result.rows[0] || null;
 }
 
+async function findAuthorizedAppCountByUserId(userId) {
+    const result = await pool.query(
+        "SELECT COUNT(*) AS total FROM oauth_consents WHERE user_id = $1",
+        [userId]
+    );
+    return result.rows[0]?.total || 0;
+}
+
+async function findAuthorizedAppsByUserId(userId) {
+    const result = await pool.query(
+        `SELECT
+            oc.client_id,
+            oc.scope,
+            oc.updated_at,
+            c.app_name,
+            c.website_url
+         FROM oauth_consents oc
+         JOIN oauth_clients c ON c.client_id = oc.client_id
+         WHERE oc.user_id = $1
+         ORDER BY oc.updated_at DESC, c.app_name ASC`,
+        [userId]
+    );
+    return result.rows;
+}
+
 async function createUser({ name, email, passwordHash }) {
     await pool.query(
         "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
@@ -17,4 +42,44 @@ async function createUser({ name, email, passwordHash }) {
     );
 }
 
-export { createUser, findUserByEmail, findUserById };
+async function revokeClientAccess({ userId, clientId }) {
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+        await client.query(
+            "DELETE FROM access_tokens WHERE user_id = $1 AND client_id = $2",
+            [userId, clientId]
+        );
+        await client.query(
+            "DELETE FROM refresh_tokens WHERE user_id = $1 AND client_id = $2",
+            [userId, clientId]
+        );
+        await client.query(
+            "DELETE FROM auth_short_codes WHERE user_id = $1 AND client_id = $2",
+            [userId, clientId]
+        );
+
+        const result = await client.query(
+            "DELETE FROM oauth_consents WHERE user_id = $1 AND client_id = $2 RETURNING id",
+            [userId, clientId]
+        );
+
+        await client.query("COMMIT");
+        return result.rowCount > 0;
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+export {
+    createUser,
+    findAuthorizedAppCountByUserId,
+    findAuthorizedAppsByUserId,
+    findUserByEmail,
+    findUserById,
+    revokeClientAccess,
+};
