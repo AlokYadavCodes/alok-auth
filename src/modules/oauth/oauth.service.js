@@ -105,6 +105,16 @@ async function startAuthorization(req) {
         created_at: Date.now(),
     };
 
+    await new Promise((resolve, reject) => {
+        req.session.save((error) => {
+            if (error) {
+                reject(ApiError.internal("Failed to save session"));
+            } else {
+                resolve();
+            }
+        });
+    });
+
     if (req.session.userId) {
         return handleAuthenticatedLogin(req, {
             flowId,

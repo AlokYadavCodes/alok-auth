@@ -29,6 +29,17 @@ async function login(req, res) {
     const { flow: flowId, returnTo } = req.body;
     const user = await authenticateUser(req.body);
     req.session.userId = user.id;
+    
+    // save explicitly to ensure session is saved before redirect
+    await new Promise((resolve, reject) => {
+        req.session.save((error) => {
+            if (error) {
+                reject(new ApiError("Failed to save session", 500));
+            } else {
+                resolve();
+            }
+        });
+    });
 
     if (flowId) {
         const redirectUrl = await handleAuthenticatedLogin(req, {
