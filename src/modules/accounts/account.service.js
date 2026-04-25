@@ -2,9 +2,11 @@ import {
     findAuthorizedAppCountByUserId,
     findAuthorizedAppsByUserId,
     revokeClientAccess,
+    updateUserProfileImage,
 } from "./account.repository.js";
 import ApiError from "../../utils/ApiError.js";
 import { findUserProfileById } from "../oauth/oauth.repository.js";
+import { uploadToCloudinary } from "../../utils/cloudinary.js";
 
 async function getAccountOverview(userId) {
     const user = await findUserProfileById(userId);
@@ -39,8 +41,26 @@ async function revokeAuthorizedAppAccess(userId, clientId) {
     await revokeClientAccess({ userId, clientId });
 }
 
+async function setUserProfileImage(userId, file) {
+    if (!file) {
+        throw ApiError.badRequest("Missing profile image");
+    }
+    if (!file.mimetype?.startsWith("image/")) {
+        throw ApiError.badRequest("Profile image must be an image file");
+    }
+
+    const profileImageUrl = await uploadToCloudinary(file);
+    if (!profileImageUrl) {
+        throw ApiError.internal("Profile image upload failed");
+    }
+
+    await updateUserProfileImage({ userId, profileImageUrl });
+    return profileImageUrl;
+}
+
 export {
     getAccountOverview,
     getAuthorizedApps,
     revokeAuthorizedAppAccess,
+    setUserProfileImage,
 };

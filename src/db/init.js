@@ -7,7 +7,8 @@ ensureDBConnected()
             id SERIAL PRIMARY KEY,
             name VARCHAR(256) NOT NULL,
             email VARCHAR(256) NOT NULL UNIQUE,
-            password VARCHAR(256)
+            password VARCHAR(256),
+            profile_image_url VARCHAR(512)
         )`
     )
     console.log("Users table:", usersResult.command);

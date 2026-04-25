@@ -3,6 +3,7 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db/pool.js";
 import cookieParser from "cookie-parser";
+import multer from "multer";
 import { env } from "./config/env.js";
 import errorHandler from "./middleware/error-handler.js";
 import authRoutes from "./modules/auth/auth.routes.js";

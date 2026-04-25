@@ -29,9 +29,11 @@ function signIdToken({ issuer, clientId, userId, nonce, scopes, user, privateKey
     }
     if (scopes.includes("email")) {
         payload.email = user.email;
+        payload.email_verified = false;
     }
     if (scopes.includes("profile")) {
         payload.name = user.name;
+        payload.picture = user.profile_image_url;
     }
 
     const encodedHeader = base64UrlEncode(header);

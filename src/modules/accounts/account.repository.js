@@ -42,6 +42,13 @@ async function createUser({ name, email, passwordHash }) {
     );
 }
 
+async function updateUserProfileImage({ userId, profileImageUrl }) {
+    const result = await pool.query(
+        "UPDATE users SET profile_image_url = $2 WHERE id = $1",
+        [userId, profileImageUrl]
+    );
+}
+
 async function revokeClientAccess({ userId, clientId }) {
     const client = await pool.connect();
 
@@ -82,4 +89,5 @@ export {
     findUserByEmail,
     findUserById,
     revokeClientAccess,
+    updateUserProfileImage,
 };

@@ -1,15 +1,31 @@
 import { escapeAttribute, escapeHtml, renderSiteLayout } from "../shared/site-layout.js";
 
-function renderAccountPage({ user, authorizedAppCount }) {
+function renderAccountPage({ user, authorizedAppCount, profileImageUpdated = false }) {
     authorizedAppCount = Number(authorizedAppCount) || 0;
+    const notice = profileImageUpdated
+        ? `<div class="notice">Profile image updated.</div>`
+        : "";
+    const profileImageUrl = user.profile_image_url || "";
     return renderAccountLayout({
         pageTitle: "Your account",
         heading: "Account",
         subtitle: "A minimal account view with your profile details and connected app summary.",
         user,
+        notice,
         sidebar: `
             <section class="mini-panel">
                 <h2>Profile</h2>
+                <div class="profile-photo">
+                    <button class="profile-photo-button" type="button" data-profile-photo-button aria-label="Change profile photo" title="Change profile photo">
+                        ${profileImageUrl
+        ? `<img class="profile-photo-image" src="${escapeAttribute(profileImageUrl)}" alt="Profile photo">`
+        : `<span class="profile-photo-fallback" aria-hidden="true">${escapeHtml(getInitials(user.name || user.email))}</span>`}
+                    </button>
+                    <div class="profile-photo-meta">
+                        <p class="profile-photo-label">Profile photo</p>
+                        <p class="profile-photo-hint">Click to upload a new one</p>
+                    </div>
+                </div>
                 <p>${escapeHtml(user.email)}</p>
                 <p>${escapeHtml(user.name || "No name on file")}</p>
             </section>
@@ -38,6 +54,31 @@ function renderAccountPage({ user, authorizedAppCount }) {
                     <a class="card-link" href="/account/apps">Review connected apps</a>
                 </article>
             </section>
+
+            <form class="profile-photo-form" method="post" action="/account/profile/image" enctype="multipart/form-data">
+                <input class="profile-photo-input" type="file" name="profileImage" accept="image/*" aria-label="Upload profile image">
+            </form>
+
+            <script>
+                (function () {
+                    const form = document.querySelector('.profile-photo-form');
+                    const fileInput = document.querySelector('.profile-photo-input');
+                    const button = document.querySelector('[data-profile-photo-button]');
+                    if (!form || !fileInput || !button) return;
+
+                    button.addEventListener('click', () => {
+                        if (button.disabled) return;
+                        fileInput.click();
+                    });
+
+                    fileInput.addEventListener('change', () => {
+                        if (!fileInput.files || fileInput.files.length === 0) return;
+                        button.disabled = true;
+                        button.setAttribute('aria-busy', 'true');
+                        form.submit();
+                    });
+                })();
+            </script>
         `,
     });
 }
@@ -152,7 +193,7 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
         navHtml,
         frameContent,
         content,
-        extraCss: `
+	        extraCss: `
             .hero h1 {
                 font-size: clamp(2.3rem, 5vw, 4.2rem);
             }
@@ -169,8 +210,8 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
                 font-size: 13px;
             }
 
-            .mini-panel,
-            .content-card {
+	            .mini-panel,
+	            .content-card {
                 background: #0d0d0d;
                 border: 1px solid #1a1a1a;
                 border-radius: 14px;
@@ -185,10 +226,10 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
                 margin-bottom: 8px;
             }
 
-            .mini-panel p,
-            .supporting-text,
-            .detail-list dt,
-            .detail-list dd {
+	            .mini-panel p,
+	            .supporting-text,
+	            .detail-list dt,
+	            .detail-list dd {
                 color: #a1a1aa;
                 font-size: 13px;
                 line-height: 1.7;
@@ -203,7 +244,7 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
                 text-underline-offset: 3px;
             }
 
-            .notice {
+	            .notice {
                 margin-top: 14px;
                 padding: 14px 16px;
                 background: #0d0d0d;
@@ -212,7 +253,88 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
                 color: #d4d4d8;
                 font-size: 13px;
                 line-height: 1.7;
-            }
+	            }
+
+	            .profile-photo {
+	                display: flex;
+	                align-items: center;
+	                gap: 12px;
+	                margin: 10px 0 12px;
+	            }
+
+	            .profile-photo-button {
+	                width: 56px;
+	                height: 56px;
+	                padding: 0;
+	                border: 1px solid #27272a;
+	                border-radius: 999px;
+	                background: #0a0a0a;
+	                display: inline-flex;
+	                align-items: center;
+	                justify-content: center;
+	                overflow: hidden;
+	                cursor: pointer;
+	                transition: transform 120ms ease, border-color 120ms ease, filter 120ms ease;
+	            }
+
+	            .profile-photo-button:hover {
+	                transform: translateY(-1px);
+	                border-color: #3f3f46;
+	                filter: brightness(1.03);
+	            }
+
+	            .profile-photo-button:disabled {
+	                opacity: 0.75;
+	                cursor: not-allowed;
+	                transform: none;
+	            }
+
+	            .profile-photo-button:focus-visible {
+	                outline: 2px solid rgba(255, 255, 255, 0.65);
+	                outline-offset: 2px;
+	            }
+
+	            .profile-photo-image {
+	                width: 100%;
+	                height: 100%;
+	                object-fit: cover;
+	                display: block;
+	            }
+
+	            .profile-photo-fallback {
+	                width: 100%;
+	                height: 100%;
+	                display: inline-flex;
+	                align-items: center;
+	                justify-content: center;
+	                font-size: 16px;
+	                font-weight: 700;
+	                letter-spacing: -0.3px;
+	                color: #0a0a0a;
+	                background: #ededed;
+	            }
+
+	            .profile-photo-meta {
+	                min-width: 0;
+	            }
+
+	            .profile-photo-label {
+	                color: #ededed;
+	                font-size: 13px;
+	                font-weight: 600;
+	                margin: 0;
+	            }
+
+	            .profile-photo-hint {
+	                margin: 2px 0 0;
+	                color: #a1a1aa;
+	                font-size: 12px;
+	                line-height: 1.5;
+	            }
+
+	            .profile-photo-form {
+	                display: none;
+	            }
 
             .content-grid {
                 display: grid;
@@ -329,6 +451,19 @@ function formatTimestamp(value) {
         dateStyle: "medium",
         timeStyle: "short",
     });
+}
+
+function getInitials(value) {
+    const cleaned = String(value || "").trim();
+    if (!cleaned) {
+        return "A";
+    }
+
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export {
