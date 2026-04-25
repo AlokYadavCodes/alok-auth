@@ -13,7 +13,16 @@ async function registerUser({ name, email, password }) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    await createUser({ name, email, passwordHash });
+
+    const profileImageUrls = [
+        "https://res.cloudinary.com/dt5inuazc/image/upload/v1777105256/avatar1_utgryf.png",
+        "https://res.cloudinary.com/dt5inuazc/image/upload/v1777105256/avatar3_wufg2k.png",
+        "https://res.cloudinary.com/dt5inuazc/image/upload/v1777105255/avatar4_xgus8a.png",
+        "https://res.cloudinary.com/dt5inuazc/image/upload/v1777105255/avatar2_n9yqxu.png"
+    ];
+    const profileImageUrl = profileImageUrls[Math.floor(Math.random() * profileImageUrls.length)];
+    
+    await createUser({ name, email, passwordHash, profileImageUrl });
 
     const user = { name, email };
     return user;

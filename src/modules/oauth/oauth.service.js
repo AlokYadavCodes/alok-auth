@@ -30,6 +30,25 @@ function getOpenIdConfiguration() {
         token_endpoint: `${env.issuer}/token`,
         userinfo_endpoint: `${env.issuer}/userinfo`,
         jwks_uri: `${env.issuer}/certs`,
+        response_types_supported: ["code"],
+        response_modes_supported: ["query"],
+        subject_types_supported: ["public"],
+        id_token_signing_alg_values_supported: ["RS256"],
+        scopes_supported: [...allowedScopes],
+        token_endpoint_auth_methods_supported: ["client_secret_post"],
+        claims_supported: [
+            "aud",
+            "email",
+            "email_verified",
+            "exp",
+            "iat",
+            "iss",
+            "name",
+            "picture",
+            "sub",
+        ],
+        code_challenge_methods_supported: ["plain", "S256"],
+        grant_types_supported: ["authorization_code", "refresh_token"],
     };
 }
 
@@ -374,6 +393,9 @@ async function getUserInfo(authHeader) {
     }
     if (scopes.includes("profile")) {
         userInfo.name = tokenRecord.name;
+        if (tokenRecord.profile_image_url) {
+            userInfo.picture = tokenRecord.profile_image_url;
+        }
     }
 
     return userInfo;
@@ -389,7 +411,7 @@ function getCerts() {
                 kty: "RSA",
                 use: "sig",
                 kid: "alok-auth-key-id",
-                alg: "PS256",
+                alg: "RS256",
                 n: jwk.n,
                 e: jwk.e,
             },

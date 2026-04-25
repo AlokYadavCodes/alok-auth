@@ -1,8 +1,8 @@
 import { escapeAttribute, escapeHtml, renderSiteLayout } from "../shared/site-layout.js";
 
 const authServerRepoUrl = "https://github.com/AlokYadavCodes/alok-auth";
-const testClientRepoUrl = "https://github.com/AlokYadavCodes/alok-auth";
-const testClientLiveUrl = "https://github.com/AlokYadavCodes/alok-auth";
+const testClientRepoUrl = "https://github.com/AlokYadavCodes/alok-auth-test-client-app";
+const testClientLiveUrl = "https://alok-auth-test-client-app.vercel.app";
 
 function renderHomepage({ currentUser }) {
     const topbarNavClassName = currentUser
@@ -97,14 +97,16 @@ function renderHomepage({ currentUser }) {
 	                </section>
 	                <section class="mini-panel">
 	                    <h2>What it supports</h2>
-	                    <ul>
-	                        <li>Authorization Code Flow</li>
-	                        <li>PKCE, state, and nonce</li>
-	                        <li>ID tokens, access tokens, and refresh tokens</li>
-	                        <li>OIDC discovery and userinfo</li>
-                        <li>Consent-based access control</li>
-                        <li>Client registration</li>
-                    </ul>
+		                    <ul>
+		                        <li>Authorization Code Flow</li>
+		                        <li>PKCE, state, and nonce</li>
+		                        <li>ID tokens, access tokens, and refresh tokens</li>
+		                        <li>
+		                            OIDC discovery (<a target="_blank" class="repo-link" href="/.well-known/openid-configuration">/.well-known/openid-configuration</a>) and userinfo
+		                        </li>
+	                        <li>Consent-based access control</li>
+	                        <li>Client registration</li>
+	                    </ul>
                 </section>
             </aside>
         </div>

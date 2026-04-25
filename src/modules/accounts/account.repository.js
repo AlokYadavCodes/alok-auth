@@ -35,10 +35,10 @@ async function findAuthorizedAppsByUserId(userId) {
     return result.rows;
 }
 
-async function createUser({ name, email, passwordHash }) {
+async function createUser({ name, email, passwordHash, profileImageUrl }) {
     await pool.query(
-        "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
-        [name, email, passwordHash]
+        "INSERT INTO users (name, email, password, profile_image_url) VALUES ($1, $2, $3, $4)",
+        [name, email, passwordHash, profileImageUrl]
     );
 }
 

@@ -71,7 +71,7 @@ async function createAccessToken({ token, scope, clientId, userId, expiresAt }) 
 
 async function findAccessTokenWithUser(token) {
     const result = await pool.query(
-        `SELECT at.scope, at.user_id, at.expires_at, u.email, u.name
+        `SELECT at.scope, at.user_id, at.expires_at, u.email, u.name, u.profile_image_url
          FROM access_tokens at
          JOIN users u ON u.id = at.user_id
          WHERE at.token = $1`,

@@ -17,9 +17,7 @@ function renderAccountPage({ user, authorizedAppCount, profileImageUpdated = fal
                 <h2>Profile</h2>
                 <div class="profile-photo">
                     <button class="profile-photo-button" type="button" data-profile-photo-button aria-label="Change profile photo" title="Change profile photo">
-                        ${profileImageUrl
-        ? `<img class="profile-photo-image" src="${escapeAttribute(profileImageUrl)}" alt="Profile photo">`
-        : `<span class="profile-photo-fallback" aria-hidden="true">${escapeHtml(getInitials(user.name || user.email))}</span>`}
+                        <img class="profile-photo-image" src="${escapeAttribute(profileImageUrl)}" alt="Profile photo">
                     </button>
                     <div class="profile-photo-meta">
                         <p class="profile-photo-label">Profile photo</p>
@@ -447,23 +445,10 @@ function renderAccountLayout({ pageTitle, heading, subtitle, user, sidebar, cont
 }
 
 function formatTimestamp(value) {
-    return new Date(value).toLocaleString("en-US", {
+    return new Date(value).toLocaleString("en-IN", {
         dateStyle: "medium",
         timeStyle: "short",
     });
-}
-
-function getInitials(value) {
-    const cleaned = String(value || "").trim();
-    if (!cleaned) {
-        return "A";
-    }
-
-    const parts = cleaned.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) {
-        return parts[0].slice(0, 2).toUpperCase();
-    }
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export {

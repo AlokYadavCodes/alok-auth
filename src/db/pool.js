@@ -5,7 +5,7 @@ import { env } from "../config/env.js";
 const pool = new pg.Pool({
   connectionString: env.databaseUrl,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: true,
   }
 });
 
